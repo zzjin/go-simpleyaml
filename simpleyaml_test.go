@@ -1,16 +1,40 @@
 package simpleyaml
 
 import (
+	"bytes"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
 
+func TestVersion(t *testing.T) {
+	assert.NotEmpty(t, Version())
+}
+
 func TestSimpleYAML(t *testing.T) {
 	var ok bool
 	var err error
+	var sy *Yaml
 
-	sy, err := NewYaml([]byte(`
+	sy = New()
+	assert.Empty(t, sy.Interface())
+
+	sy.SetPath([]string{}, "test")
+	assert.NotEmpty(t, sy.Interface())
+
+	sy.SetPath([]string{"test", "string"}, "simpleyaml")
+	assert.NotEmpty(t, sy.Interface())
+
+	sy.SetPath([]string{"test", "string"}, "simpleyaml2")
+	assert.NotEmpty(t, sy.Interface())
+
+	//tab to make err
+	sy, err = NewYaml([]byte(`
+	tab
+`))
+	assert.NotNil(t, err)
+
+	testData := []byte(`
 test:
   string_array: ["asdf", "ghjk", "zxcv"]
   string_array_null: ["abc", null, "efg"]
@@ -25,10 +49,21 @@ test:
   bool: true
   sub_obj:
     a: 1
-`))
+`)
 
+	reader := bytes.NewReader(testData)
+	sy, err = NewFromReader(reader)
 	assert.NotEqual(t, nil, sy)
 	assert.Nil(t, err)
+
+	sy, err = NewYaml(testData)
+	assert.NotEqual(t, nil, sy)
+	assert.Nil(t, err)
+
+	assert.NotEmpty(t, sy.Interface())
+
+	encodeBytes, err := sy.Marshal()
+	assert.Len(t, encodeBytes, 273)
 
 	_, ok = sy.CheckGet("test")
 	assert.Equal(t, true, ok)
@@ -45,6 +80,8 @@ test:
 	assert.Equal(t, 2, awsval)
 	awsval, _ = aws.GetIndex(1).Get("subkeythree").Int()
 	assert.Equal(t, 3, awsval)
+	awsnot := aws.GetIndex(2)
+	assert.Equal(t, nil, awsnot.Interface())
 
 	i, _ := sy.Get("test").Get("int").Int()
 	assert.Equal(t, 10, i)
@@ -55,11 +92,29 @@ test:
 	s, _ := sy.Get("test").Get("string").String()
 	assert.Equal(t, "simplesyaml", s)
 
+	sb, _ := sy.Get("test").Get("string").Bytes()
+	assert.Equal(t, []byte("simplesyaml"), sb)
+
+	_, err = sy.Get("test").Get("string_array").Bytes()
+	assert.NotNil(t, err)
+
 	b, _ := sy.Get("test").Get("bool").Bool()
 	assert.Equal(t, true, b)
+	_, err = sy.Get("test").Get("int").Bool()
+	assert.NotNil(t, err)
 
 	mi := sy.Get("test").Get("int").MustInt()
 	assert.Equal(t, 10, mi)
+
+	mi64 := sy.Get("test").Get("int").MustInt64()
+	assert.Equal(t, int64(10), mi64)
+	mi64Not := sy.Get("test").Get("int_not").MustInt64(10)
+	assert.Equal(t, int64(10), mi64Not)
+
+	mui := sy.Get("test").Get("int").MustUint64()
+	assert.Equal(t, uint64(10), mui)
+	muiNot := sy.Get("test").Get("int_not").MustUint64(10)
+	assert.Equal(t, uint64(10), muiNot)
 
 	mi2 := sy.Get("test").Get("missing_int").MustInt(5150)
 	assert.Equal(t, 5150, mi2)
@@ -108,9 +163,11 @@ test:
 	assert.Equal(t, 10, gp2)
 
 	assert.Equal(t, sy.Get("test").Get("bool").MustBool(), true)
+	assert.Equal(t, sy.Get("test").Get("bool_not").MustBool(false), false)
 
 	sy.Set("float2", 300.0)
 	assert.Equal(t, sy.Get("float2").MustFloat64(), 300.0)
+	assert.Equal(t, sy.Get("float_no").MustFloat64(200.0), 200.0)
 
 	sy.Set("test2", "setTest")
 	assert.Equal(t, "setTest", sy.Get("test2").MustString())

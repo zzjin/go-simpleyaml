@@ -1,47 +1,75 @@
 package simpleyaml
 
 import (
-	"strconv"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
 
 func TestSimpleYAMLGo1(t *testing.T) {
-	sy, newErr := NewYaml([]byte(`
+	sy, err := NewYaml([]byte(`
 test:
-  array: [1, "2", 3.0]
-  arraywithsubs:
-    - subkeyone: 1
-    - subkeytwo: 2
-      subkeythree: 3
-  bignum: 800000000000000008
+  float64: 30.02
+  int64: 8000000000000000008
+  int: -9527
+  string: "simpleyaml"
 `))
-	assert.NotEqual(t, nil, sy)
-	assert.Equal(t, nil, newErr)
-
-	arr, _ := sy.Get("test").Get("array").Array()
-	assert.NotEqual(t, nil, arr)
-	for i, v := range arr {
-		var iv int
-		switch v.(type) {
-		case int:
-			iv = v.(int)
-		case float64:
-			iv = int(v.(float64))
-		case string:
-			iv, _ = strconv.Atoi(v.(string))
-		}
-		assert.Equal(t, i+1, iv)
+	assert.NotEqual(t, sy, nil)
+	if !assert.Nil(t, err) {
+		t.Fail()
 	}
 
-	ma := sy.Get("test").Get("array").MustArray()
-	assert.Equal(t, ma, []interface{}{int(1), "2", float64(3)})
+	arr, _ := sy.Get("test").Array()
+	assert.NotEqual(t, arr, nil)
 
-	mm := sy.Get("test").Get("arraywithsubs").GetIndex(0).MustMap()
-	assert.Equal(t, mm, map[interface{}]interface{}{"subkeyone": int(1)})
-	assert.Equal(t, mm["subkeyone"], int(1))
+	mm := sy.Get("test").MustMap()
+	assert.Equal(t, mm, map[interface{}]interface{}{
+		"float64": float64(30.02),
+		"int64":   int(8000000000000000008), // belows are all default to int
+		"int":     int(-9527),
+		"string":  "simpleyaml",
+	})
 
-	bigint := sy.Get("test").Get("bignum").MustInt64()
-	assert.Equal(t, bigint, int64(800000000000000008))
+	ne := sy.Get("test").Get("not_exists")
+	assert.Empty(t, ne)
+
+	//for Float64
+	var f64 float64
+	f64, _ = sy.Get("test").Get("float64").Float64()
+	assert.Equal(t, f64, float64(30.02))
+	f64, _ = sy.Get("test").Get("int64").Float64()
+	assert.Equal(t, f64, float64(8000000000000000008))
+	f64, err = sy.Get("test").Get("string").Float64()
+	assert.NotNil(t, err)
+
+	//for Int
+	var defaultInt int
+	defaultInt, _ = sy.Get("test").Get("float64").Int()
+	assert.Equal(t, defaultInt, int(30))
+	defaultInt, _ = sy.Get("test").Get("int64").Int()
+	assert.Equal(t, defaultInt, int(8000000000000000008))
+	defaultInt, _ = sy.Get("test").Get("int").Int()
+	assert.Equal(t, defaultInt, int(-9527))
+	defaultInt, err = sy.Get("test").Get("string").Int()
+	assert.NotNil(t, err)
+
+	//for Int64
+	var defaultInt64 int64
+	defaultInt64, _ = sy.Get("test").Get("float64").Int64()
+	assert.Equal(t, defaultInt64, int64(30))
+	defaultInt64, _ = sy.Get("test").Get("int64").Int64()
+	assert.Equal(t, defaultInt64, int64(8000000000000000008))
+	defaultInt64, err = sy.Get("test").Get("string").Int64()
+	assert.NotNil(t, err)
+
+	//for Uint64
+	var defaultUint64 uint64
+	defaultUint64, _ = sy.Get("test").Get("float64").Uint64()
+	assert.Equal(t, defaultUint64, uint64(30))
+	defaultUint64, _ = sy.Get("test").Get("int64").Uint64()
+	assert.Equal(t, defaultUint64, uint64(8000000000000000008))
+	defaultUint64, _ = sy.Get("test").Get("int").Uint64()
+	assert.Equal(t, defaultUint64, uint64(18446744073709542089))
+	defaultUint64, err = sy.Get("test").Get("string").Uint64()
+	assert.NotNil(t, err)
 }
