@@ -29,7 +29,7 @@ func TestSimpleYAML(t *testing.T) {
 	assert.NotEmpty(t, sy.Interface())
 
 	//tab to make err
-	sy, err = NewYaml([]byte(`
+	_, err = NewYaml([]byte(`
 	tab
 `))
 	assert.NotNil(t, err)
@@ -64,6 +64,7 @@ test:
 
 	encodeBytes, err := sy.Marshal()
 	assert.Len(t, encodeBytes, 273)
+	assert.Nil(t, err)
 
 	_, ok = sy.CheckGet("test")
 	assert.Equal(t, true, ok)

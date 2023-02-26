@@ -12,8 +12,6 @@ func (y *Yaml) Float64() (float64, error) {
 		return reflect.ValueOf(y.data).Float(), nil
 	case int, int8, int16, int32, int64:
 		return float64(reflect.ValueOf(y.data).Int()), nil
-	case uint, uint8, uint16, uint32, uint64:
-		return float64(reflect.ValueOf(y.data).Uint()), nil
 	}
 	return 0, errors.New("invalid value type")
 }
@@ -25,8 +23,6 @@ func (y *Yaml) Int() (int, error) {
 		return int(reflect.ValueOf(y.data).Float()), nil
 	case int, int8, int16, int32, int64:
 		return int(reflect.ValueOf(y.data).Int()), nil
-	case uint, uint8, uint16, uint32, uint64:
-		return int(reflect.ValueOf(y.data).Uint()), nil
 	}
 	return 0, errors.New("invalid value type")
 }
@@ -38,8 +34,6 @@ func (y *Yaml) Int64() (int64, error) {
 		return int64(reflect.ValueOf(y.data).Float()), nil
 	case int, int8, int16, int32, int64:
 		return reflect.ValueOf(y.data).Int(), nil
-	case uint, uint8, uint16, uint32, uint64:
-		return int64(reflect.ValueOf(y.data).Uint()), nil
 	}
 	return 0, errors.New("invalid value type")
 }
@@ -51,8 +45,6 @@ func (y *Yaml) Uint64() (uint64, error) {
 		return uint64(reflect.ValueOf(y.data).Float()), nil
 	case int, int8, int16, int32, int64:
 		return uint64(reflect.ValueOf(y.data).Int()), nil
-	case uint, uint8, uint16, uint32, uint64:
-		return reflect.ValueOf(y.data).Uint(), nil
 	}
 	return 0, errors.New("invalid value type")
 }

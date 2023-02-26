@@ -39,7 +39,7 @@ test:
 	assert.Equal(t, f64, float64(30.02))
 	f64, _ = sy.Get("test").Get("int64").Float64()
 	assert.Equal(t, f64, float64(8000000000000000008))
-	f64, err = sy.Get("test").Get("string").Float64()
+	_, err = sy.Get("test").Get("string").Float64()
 	assert.NotNil(t, err)
 
 	//for Int
@@ -50,7 +50,7 @@ test:
 	assert.Equal(t, defaultInt, int(8000000000000000008))
 	defaultInt, _ = sy.Get("test").Get("int").Int()
 	assert.Equal(t, defaultInt, int(-9527))
-	defaultInt, err = sy.Get("test").Get("string").Int()
+	_, err = sy.Get("test").Get("string").Int()
 	assert.NotNil(t, err)
 
 	//for Int64
@@ -59,7 +59,7 @@ test:
 	assert.Equal(t, defaultInt64, int64(30))
 	defaultInt64, _ = sy.Get("test").Get("int64").Int64()
 	assert.Equal(t, defaultInt64, int64(8000000000000000008))
-	defaultInt64, err = sy.Get("test").Get("string").Int64()
+	_, err = sy.Get("test").Get("string").Int64()
 	assert.NotNil(t, err)
 
 	//for Uint64
@@ -70,6 +70,6 @@ test:
 	assert.Equal(t, defaultUint64, uint64(8000000000000000008))
 	defaultUint64, _ = sy.Get("test").Get("int").Uint64()
 	assert.Equal(t, defaultUint64, uint64(18446744073709542089))
-	defaultUint64, err = sy.Get("test").Get("string").Uint64()
+	_, err = sy.Get("test").Get("string").Uint64()
 	assert.NotNil(t, err)
 }

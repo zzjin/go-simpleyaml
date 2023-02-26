@@ -3,14 +3,13 @@ package simpleyaml
 import (
 	"errors"
 	"io"
-	"log"
 
 	yaml "gopkg.in/yaml.v2"
 )
 
 // Version returns the current implementation version
 func Version() string {
-	return "0.1.0"
+	return "0.2.0"
 }
 
 // Yaml Yaml data
@@ -121,7 +120,8 @@ func (y *Yaml) Del(key string) {
 // for `key` in its `map` representation
 //
 // useful for chaining operations (to traverse a nested YAML):
-//    sy.Get("top_level").Get("dict").Get("value").Int()
+//
+//	sy.Get("top_level").Get("dict").Get("value").Int()
 func (y *Yaml) Get(key string) *Yaml {
 	m, err := y.Map()
 	if err == nil {
@@ -135,7 +135,7 @@ func (y *Yaml) Get(key string) *Yaml {
 // GetPath searches for the item as specified by the branch
 // without the need to deep dive using Get()'s.
 //
-//   sy.GetPath("top_level", "dict")
+//	sy.GetPath("top_level", "dict")
 func (y *Yaml) GetPath(branch ...string) *Yaml {
 	jin := y
 	for _, p := range branch {
@@ -149,7 +149,8 @@ func (y *Yaml) GetPath(branch ...string) *Yaml {
 //
 // this is the analog to Get when accessing elements of
 // a array instead of a object:
-//    sy.Get("top_level").Get("array").GetIndex(1).Get("key").Int()
+//
+//	sy.Get("top_level").Get("array").GetIndex(1).Get("key").Int()
 func (y *Yaml) GetIndex(index int) *Yaml {
 	a, err := y.Array()
 	if err == nil {
@@ -164,9 +165,10 @@ func (y *Yaml) GetIndex(index int) *Yaml {
 // a `bool` identifying success or failure
 //
 // useful for chained operations when success is important:
-//    if data, ok := sy.Get("top_level").CheckGet("inner"); ok {
-//        log.Println(data)
-//    }
+//
+//	if data, ok := sy.Get("top_level").CheckGet("inner"); ok {
+//	    log.Println(data)
+//	}
 func (y *Yaml) CheckGet(key string) (*Yaml, bool) {
 	m, err := y.Map()
 	if err == nil {
@@ -240,19 +242,16 @@ func (y *Yaml) StringArray() ([]string, error) {
 
 // MustArray guarantees the return of a `[]interface{}` (with optional default)
 //
-// useful when you want to interate over array values in a succinct manner:
-//		for i, v := range sy.Get("results").MustArray() {
-//			fmt.Println(i, v)
-//		}
+// useful when you want to iterate over array values in a succinct manner:
+//
+//	for i, v := range sy.Get("results").MustArray() {
+//		fmt.Println(i, v)
+//	}
 func (y *Yaml) MustArray(args ...[]interface{}) []interface{} {
 	var def []interface{}
 
-	switch len(args) {
-	case 0:
-	case 1:
+	if len(args) > 0 {
 		def = args[0]
-	default:
-		log.Panicf("MustArray() received too many arguments %d", len(args))
 	}
 
 	a, err := y.Array()
@@ -265,19 +264,16 @@ func (y *Yaml) MustArray(args ...[]interface{}) []interface{} {
 
 // MustMap guarantees the return of a `map[interface{}]interface{}` (with optional default)
 //
-// useful when you want to interate over map values in a succinct manner:
-//		for k, v := range sy.Get("dictionary").MustMap() {
-//			fmt.Println(k, v)
-//		}
+// useful when you want to iterate over map values in a succinct manner:
+//
+//	for k, v := range sy.Get("dictionary").MustMap() {
+//		fmt.Println(k, v)
+//	}
 func (y *Yaml) MustMap(args ...map[interface{}]interface{}) map[interface{}]interface{} {
 	var def map[interface{}]interface{}
 
-	switch len(args) {
-	case 0:
-	case 1:
+	if len(args) > 0 {
 		def = args[0]
-	default:
-		log.Panicf("MustMap() received too many arguments %d", len(args))
 	}
 
 	a, err := y.Map()
@@ -291,16 +287,13 @@ func (y *Yaml) MustMap(args ...map[interface{}]interface{}) map[interface{}]inte
 // MustString guarantees the return of a `string` (with optional default)
 //
 // useful when you explicitly want a `string` in a single value return context:
-//     myFunc(sy.Get("param1").MustString(), sy.Get("optional_param").MustString("my_default"))
+//
+//	myFunc(sy.Get("param1").MustString(), sy.Get("optional_param").MustString("my_default"))
 func (y *Yaml) MustString(args ...string) string {
 	var def string
 
-	switch len(args) {
-	case 0:
-	case 1:
+	if len(args) > 0 {
 		def = args[0]
-	default:
-		log.Panicf("MustString() received too many arguments %d", len(args))
 	}
 
 	s, err := y.String()
@@ -313,19 +306,16 @@ func (y *Yaml) MustString(args ...string) string {
 
 // MustStringArray guarantees the return of a `[]string` (with optional default)
 //
-// useful when you want to interate over array values in a succinct manner:
-//		for i, s := range sy.Get("results").MustStringArray() {
-//			fmt.Println(i, s)
-//		}
+// useful when you want to iterate over array values in a succinct manner:
+//
+//	for i, s := range sy.Get("results").MustStringArray() {
+//		fmt.Println(i, s)
+//	}
 func (y *Yaml) MustStringArray(args ...[]string) []string {
 	var def []string
 
-	switch len(args) {
-	case 0:
-	case 1:
+	if len(args) > 0 {
 		def = args[0]
-	default:
-		log.Panicf("MustStringArray() received too many arguments %d", len(args))
 	}
 
 	a, err := y.StringArray()
@@ -339,16 +329,13 @@ func (y *Yaml) MustStringArray(args ...[]string) []string {
 // MustInt guarantees the return of an `int` (with optional default)
 //
 // useful when you explicitly want an `int` in a single value return context:
-//     myFunc(sy.Get("param1").MustInt(), sy.Get("optional_param").MustInt(5150))
+//
+//	myFunc(sy.Get("param1").MustInt(), sy.Get("optional_param").MustInt(5150))
 func (y *Yaml) MustInt(args ...int) int {
 	var def int
 
-	switch len(args) {
-	case 0:
-	case 1:
+	if len(args) > 0 {
 		def = args[0]
-	default:
-		log.Panicf("MustInt() received too many arguments %d", len(args))
 	}
 
 	i, err := y.Int()
@@ -362,16 +349,13 @@ func (y *Yaml) MustInt(args ...int) int {
 // MustFloat64 guarantees the return of a `float64` (with optional default)
 //
 // useful when you explicitly want a `float64` in a single value return context:
-//     myFunc(sy.Get("param1").MustFloat64(), sy.Get("optional_param").MustFloat64(5.150))
+//
+//	myFunc(sy.Get("param1").MustFloat64(), sy.Get("optional_param").MustFloat64(5.150))
 func (y *Yaml) MustFloat64(args ...float64) float64 {
 	var def float64
 
-	switch len(args) {
-	case 0:
-	case 1:
+	if len(args) > 0 {
 		def = args[0]
-	default:
-		log.Panicf("MustFloat64() received too many arguments %d", len(args))
 	}
 
 	f, err := y.Float64()
@@ -385,16 +369,13 @@ func (y *Yaml) MustFloat64(args ...float64) float64 {
 // MustBool guarantees the return of a `bool` (with optional default)
 //
 // useful when you explicitly want a `bool` in a single value return context:
-//     myFunc(sy.Get("param1").MustBool(), sy.Get("optional_param").MustBool(true))
+//
+//	myFunc(sy.Get("param1").MustBool(), sy.Get("optional_param").MustBool(true))
 func (y *Yaml) MustBool(args ...bool) bool {
 	var def bool
 
-	switch len(args) {
-	case 0:
-	case 1:
+	if len(args) > 0 {
 		def = args[0]
-	default:
-		log.Panicf("MustBool() received too many arguments %d", len(args))
 	}
 
 	b, err := y.Bool()
@@ -408,16 +389,13 @@ func (y *Yaml) MustBool(args ...bool) bool {
 // MustInt64 guarantees the return of an `int64` (with optional default)
 //
 // useful when you explicitly want an `int64` in a single value return context:
-//     myFunc(sy.Get("param1").MustInt64(), sy.Get("optional_param").MustInt64(5150))
+//
+//	myFunc(sy.Get("param1").MustInt64(), sy.Get("optional_param").MustInt64(5150))
 func (y *Yaml) MustInt64(args ...int64) int64 {
 	var def int64
 
-	switch len(args) {
-	case 0:
-	case 1:
+	if len(args) > 0 {
 		def = args[0]
-	default:
-		log.Panicf("MustInt64() received too many arguments %d", len(args))
 	}
 
 	i, err := y.Int64()
@@ -431,16 +409,13 @@ func (y *Yaml) MustInt64(args ...int64) int64 {
 // MustUint64 guarantees the return of an `uint64` (with optional default)
 //
 // useful when you explicitly want an `uint64` in a single value return context:
-//     myFunc(sy.Get("param1").MustUint64(), sy.Get("optional_param").MustUint64(5150))
+//
+//	myFunc(sy.Get("param1").MustUint64(), sy.Get("optional_param").MustUint64(5150))
 func (y *Yaml) MustUint64(args ...uint64) uint64 {
 	var def uint64
 
-	switch len(args) {
-	case 0:
-	case 1:
+	if len(args) > 0 {
 		def = args[0]
-	default:
-		log.Panicf("MustUint64() received too many arguments %d", len(args))
 	}
 
 	i, err := y.Uint64()
