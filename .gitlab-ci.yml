@@ -1,42 +1,18 @@
 stages:
   - test
 
-.tests:
+cover_test:
   stage: test
+  image: golang:latest
   cache:
     paths:
+      - /apt-cache
       - $GOPATH/src/github.com
       - $GOPATH/src/golang.org
       - $GOPATH/src/google.golang.org
       - $GOPATH/src/gopkg.in
   before_script:
-    - go get gopkg.in/yaml.v2
-    - go get github.com/stretchr/testify
-    - go get github.com/axw/gocov/gocov
+    - go install github.com/axw/gocov/gocov@latest
   script:
     - gocov test `go list ./...` | gocov report
   coverage: '/Total Coverage: \d+\.\d+/'
-.tests-go-lt111:
-  extends: .tests
-  before_script:
-    - go get gopkg.in/yaml.v2
-    - go get github.com/stretchr/testify
-    - go get github.com/axw/gocov/gocov
-    - echo "Must move to GOPATH!"
-    - mkdir -p "$GOPATH/src/gitlab.com/$CI_PROJECT_PATH"
-    - rm -rf "$GOPATH/src/gitlab.com/$CI_PROJECT_PATH"
-    - cp -r $CI_PROJECT_DIR "$GOPATH/src/gitlab.com/$CI_PROJECT_PATH"
-    - cd "$GOPATH/src/gitlab.com/$CI_PROJECT_PATH"
-
-test-go-1.8:
-  image: golang:1.8
-  extends: .tests-go-lt111
-test-go-1.9:
-  image: golang:1.9
-  extends: .tests-go-lt111
-test-go-1.10:
-  image: golang:1.10
-  extends: .tests-go-lt111
-test-go-1.11:
-  image: golang:1.11
-  extends: .tests
